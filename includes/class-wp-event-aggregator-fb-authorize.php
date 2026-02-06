@@ -102,6 +102,25 @@ class WP_Event_Aggregator_FB_Authorize {
 					   	}
 
 					   	update_option('wpea_fb_authorize_user', $wpea_fb_authorize_user );
+
+						//getting page token
+						$args          = array( 'timeout' => 15 );
+						$accounts_call = wp_remote_get( 'https://graph.facebook.com/' . $api_version . "/me/accounts?access_token=$access_token&limit=100&offset=0", $args );
+						$accounts      = wp_remote_retrieve_body( $accounts_call );
+						$accounts      = json_decode( $accounts );
+						$accounts      = isset( $accounts->data ) ? $accounts->data : array();
+						if ( ! empty( $accounts ) ) {
+							$pages = array();
+							foreach ( $accounts as $account ) {
+								$pages[ $account->id ] = array(
+									'id'           => $account->id,
+									'name'         => $account->name,
+									'access_token' => $account->access_token,
+								);
+							}
+							update_option( 'wpea_fb_user_pages', $pages );
+						}
+
 					   	$redirect_url = admin_url('admin.php?page=import_events&tab=settings&wauthorize=1');
 					    wp_safe_redirect($redirect_url);
 					    exit();
