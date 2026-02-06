@@ -179,7 +179,21 @@ class WP_Event_Aggregator_EventON {
 			}
 
 			// Assign Featured images
-			$event_image = $centralize_array['image_url'];
+			$event_image = $centralize_array['image_url'] ?? '';
+			$url         = $centralize_array['url'] ?? '';
+			$match       = 'https://www.facebook.com/events/';
+
+			if (
+				empty($event_image) &&
+				strpos($url, $match) !== false &&
+				( $event_args['import_origin'] ?? '' ) === 'ical' &&
+				isset($importevents->common_pro) &&
+				is_object($importevents->common_pro) &&
+				method_exists($importevents->common_pro, 'wpea_get_facebook_event_url')
+			) {
+				$event_image = $importevents->common_pro->wpea_get_facebook_event_url($origin_event_id);
+			}
+
 			if ( ! empty( $event_image ) ) {
 				$importevents->common->wpea_set_feature_image_logic( $inserted_event_id, $event_image, $event_args );
 			}else{

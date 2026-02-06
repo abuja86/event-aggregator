@@ -251,9 +251,11 @@ class WP_Event_Aggregator_Facebook {
 	 *
 	 * @since 1.0.0
 	 */
-	public function generate_facebook_api_url( $path = '', $query_args = array() ) {
+	public function generate_facebook_api_url( $path = '', $query_args = array(), $access_token = '' ) {
 		$query_args = array_merge( $query_args, array( 'access_token' => $this->get_access_token() ) );
-		
+		if ( ! empty( $access_token ) ) {
+			$query_args['access_token'] = $access_token;
+		}
 		$url = add_query_arg( $query_args, $this->fb_graph_url . $path );
 
 		return $url;
@@ -511,17 +513,23 @@ class WP_Event_Aggregator_Facebook {
 	 * @param array $organizer_id Organizer event.
 	 * @return array
 	 */
-	public function get_organizer_name_by_id( $organizer_id ) {
-		
-		if( !$organizer_id || $organizer_id == '' ){
+	public function get_organizer_name_by_id( $organizer_id, $full_data = false ) {
+		if( !$organizer_id || empty( $organizer_id ) ){
 			return;
 		}
 
 		$organizer_raw_data = $this->get_facebook_response_data( $organizer_id, array() );
+		if( isset( $organizer_raw_data->error->message ) ){
+			return false;
+		}
+
 		if( ! isset( $organizer_raw_data->name ) ){
-			return '';
+			return false;
 		}
 		
+		if ( $full_data ) {
+			return $organizer_raw_data;
+		}
 		$oraganizer_name = isset( $organizer_raw_data->name ) ? $organizer_raw_data->name : '';
 		return $oraganizer_name;
 
