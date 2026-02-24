@@ -491,7 +491,7 @@ class WP_Event_Aggregator_Common {
 		$event_id = get_the_ID();
 		$event_origin = get_post_meta( $event_id, 'wpea_event_origin', true );
 		$eventum = false;
-		if( wpea_is_pro() ){
+		if( wpea_is_pro() && isset( $importevents->eventum ) && is_object( $importevents->eventum ) ){
 			$eventum = ( $importevents->eventum->get_event_posttype()  == $xt_post_type );
 		}
 		if ( $event_id > 0 && $event_origin == 'eventbrite' ) {
