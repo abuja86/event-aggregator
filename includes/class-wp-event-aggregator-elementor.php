@@ -1,6 +1,8 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) exit;
 
+if ( ! class_exists( 'WPEA_Elementor_Widget' ) && did_action( 'elementor/loaded' ) ) :
+
 class WPEA_Elementor_Widget extends \Elementor\Widget_Base {
 
 	public function get_name() {
@@ -151,6 +153,8 @@ class WPEA_Elementor_Widget extends \Elementor\Widget_Base {
 	}
 }
 
+endif;
+
 function wpea_register_elementor_widgets() {
 	if (!did_action('elementor/loaded')) {
 		return;
@@ -160,6 +164,8 @@ function wpea_register_elementor_widgets() {
 		return;
 	}
 
-	\Elementor\Plugin::instance()->widgets_manager->register_widget_type(new WPEA_Elementor_Widget());
+	if ( class_exists( 'WPEA_Elementor_Widget' ) ) {
+		\Elementor\Plugin::instance()->widgets_manager->register_widget_type(new WPEA_Elementor_Widget());
+	}
 }
 add_action('elementor/widgets/widgets_registered', 'wpea_register_elementor_widgets');
