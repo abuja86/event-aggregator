@@ -80,9 +80,13 @@ class WP_Event_Aggregator{
 			self::$instance->ee4 = new WP_Event_Aggregator_EE4();
 			self::$instance->my_calendar = new WP_Event_Aggregator_My_Calendar();
 			self::$instance->eventprime = new WP_Event_Aggregator_EventPrime();
-			
+
+			if( wpea_is_pro() ){
+				self::$instance->custom_fields = new WP_Event_Aggregator_Custom_Fields();
+				self::$instance->venues = new WP_Event_Aggregator_Venues();
+			}
 		}
-		return self::$instance;	
+		return self::$instance;
 	}
 
 	/** Magic Methods *********************************************************/
@@ -169,6 +173,10 @@ class WP_Event_Aggregator{
 		require_once WPEA_PLUGIN_DIR . 'includes/class-wp-event-aggregator-ajax.php';
 		require_once WPEA_PLUGIN_DIR . 'includes/class-wp-event-aggregator-list-table.php';
 		require_once WPEA_PLUGIN_DIR . 'includes/class-wp-event-aggregator-admin.php';
+		require_once WPEA_PLUGIN_DIR . 'includes/class-wp-event-aggregator-custom-fields.php';
+		require_once WPEA_PLUGIN_DIR . 'includes/class-wp-event-aggregator-widgets.php';
+		require_once WPEA_PLUGIN_DIR . 'includes/class-wp-event-aggregator-elementor.php';
+		require_once WPEA_PLUGIN_DIR . 'includes/class-wp-event-aggregator-venues.php';
 		if ( defined( 'WPEAPRO_PLUGIN_DIR' ) && function_exists('wpea_is_pro') && wpea_is_pro() ){
 			require_once WPEAPRO_PLUGIN_DIR . 'includes/class-wp-event-aggregator-manage-import.php';
 		}else{
@@ -288,6 +296,11 @@ class WP_Event_Aggregator{
 		wp_enqueue_style('font-awesome', $css_dir . 'font-awesome.min.css', false, WPEA_VERSION );
 	 	wp_enqueue_style('wp-event-aggregator-front', $css_dir . 'wp-event-aggregator.css', false, WPEA_VERSION );
 		wp_enqueue_style('wp-event-aggregator-front-style2', $css_dir . 'grid-style2.css', false, WPEA_VERSION );
+
+		if( wpea_is_pro() ){
+			wp_enqueue_style('wp-event-aggregator-pro', $css_dir . 'wp-event-aggregator-pro.css', false, WPEA_VERSION );
+			wp_enqueue_style('leaflet', 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css', false, '1.9.4' );
+		}
 	}
 
 	/**
@@ -298,12 +311,18 @@ class WP_Event_Aggregator{
 	 * @return void
 	 */
 	public function wpea_enqueue_script() {
-		
+
 		$js_dir = WPEA_PLUGIN_URL . 'assets/js/';
-			wp_enqueue_script( 'wpea-ajax-pagi', $js_dir . 'wpea-ajax-pagi.js', array( 'jquery' ), WPEA_VERSION, true );
-			wp_localize_script( 'wpea-ajax-pagi', 'wpea_ajax', array(
-				'ajaxurl' => admin_url( 'admin-ajax.php' ),
+		wp_enqueue_script( 'wpea-ajax-pagi', $js_dir . 'wpea-ajax-pagi.js', array( 'jquery' ), WPEA_VERSION, true );
+		wp_localize_script( 'wpea-ajax-pagi', 'wpea_ajax', array(
+			'ajaxurl' => admin_url( 'admin-ajax.php' ),
+			'nonce' => wp_create_nonce( 'wpea_ajax_nonce' ),
 		));
+
+		if( wpea_is_pro() ){
+			wp_enqueue_script( 'leaflet', 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js', array(), '1.9.4', true );
+			wp_enqueue_script( 'wp-event-aggregator-pro', $js_dir . 'wp-event-aggregator-pro.js', array( 'jquery', 'leaflet' ), WPEA_VERSION, true );
+		}
 	}
 
 }

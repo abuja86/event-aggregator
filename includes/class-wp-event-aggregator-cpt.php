@@ -577,7 +577,7 @@ class WP_Event_Aggregator_Cpt {
 		$atts['past_events'] = (isset($atts['past_events']) && ($atts['past_events'] === 'yes' || $atts['past_events'] === true)) ? 'yes' : '';
 
 		/* layout whitelist */
-		$allowed_layouts = array( 'style1', 'style2', 'style3', 'style4' );
+		$allowed_layouts = array( 'style1', 'style2', 'style3', 'style4', 'week', 'photo', 'map', 'summary' );
 		$atts['layout'] = (isset($atts['layout']) && in_array($atts['layout'], $allowed_layouts, true)) ? $atts['layout'] : 'style1';
 
 		/* order */
@@ -800,22 +800,38 @@ class WP_Event_Aggregator_Cpt {
             $template_args['css_class'] = $css_class;
             $template_args['direct_link'] = $direct_link;
 			$template_args['wpea_ed_image'] = $wpea_ed_image;
-			if( $wp_events->have_posts() ):
-				while ( $wp_events->have_posts() ) : $wp_events->the_post();
-					
-					if( isset( $atts['layout'] ) && $atts['layout'] == 'style2' && wpea_is_pro() ){
-						get_wpea_template( 'wpea-archive-content2.php', $template_args );
-					}elseif( isset( $atts['layout'] ) && $atts['layout'] == 'style3' ){
-						get_wpea_template( 'wpea-archive-content3.php', $template_args );
-					}elseif( isset( $atts['layout'] ) && $atts['layout'] == 'style4' ){
-						get_wpea_template( 'wpea-archive-content4.php', $template_args );
-					}else{
-						get_wpea_template( 'wpea-archive-content.php', $template_args );
-					}
-					
-				endwhile; // End of the loop.
+			$template_args['wp_events'] = $wp_events;
+			$template_args['week_start'] = isset($atts['week_start']) ? $atts['week_start'] : strtotime('monday this week');
 
-				if ( isset( $atts['ajaxpagi'] ) && $atts['ajaxpagi'] == 'yes' ) {
+			if( isset( $atts['layout'] ) && $atts['layout'] == 'week' && wpea_is_pro() ){
+				get_wpea_template( 'wpea-week-view.php', $template_args );
+			}elseif( isset( $atts['layout'] ) && $atts['layout'] == 'map' && wpea_is_pro() ){
+				get_wpea_template( 'wpea-map-view.php', $template_args );
+			}else{
+				if( $wp_events->have_posts() ):
+					while ( $wp_events->have_posts() ) : $wp_events->the_post();
+
+						if( isset( $atts['layout'] ) && $atts['layout'] == 'style2' && wpea_is_pro() ){
+							get_wpea_template( 'wpea-archive-content2.php', $template_args );
+						}elseif( isset( $atts['layout'] ) && $atts['layout'] == 'style3' ){
+							get_wpea_template( 'wpea-archive-content3.php', $template_args );
+						}elseif( isset( $atts['layout'] ) && $atts['layout'] == 'style4' ){
+							get_wpea_template( 'wpea-archive-content4.php', $template_args );
+						}elseif( isset( $atts['layout'] ) && $atts['layout'] == 'photo' && wpea_is_pro() ){
+							get_wpea_template( 'wpea-photo-view.php', $template_args );
+						}elseif( isset( $atts['layout'] ) && $atts['layout'] == 'summary' && wpea_is_pro() ){
+							get_wpea_template( 'wpea-summary-view.php', $template_args );
+						}else{
+							get_wpea_template( 'wpea-archive-content.php', $template_args );
+						}
+
+					endwhile; // End of the loop.
+				else:
+					echo esc_html( apply_filters( 'wpea_no_events_found_message', __( "No Events are found.", 'wp-event-aggregator' ) ) );
+				endif;
+			}
+
+			if ( isset( $atts['ajaxpagi'] ) && $atts['ajaxpagi'] == 'yes' ) {
 					if ( $wp_events->max_num_pages > 1 ) { ?>
 						<div class="col-wpea-md-12">
 							<nav class="prev-next-posts">
@@ -849,9 +865,6 @@ class WP_Event_Aggregator_Cpt {
 					<?php
 					endif;
 				}
-			else:
-				echo esc_html( apply_filters( 'wpea_no_events_found_message', __( "No Events are found.", 'wp-event-aggregator' ) ) );
-			endif;
 
 			?>
 		</div>

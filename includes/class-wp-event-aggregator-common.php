@@ -1512,13 +1512,7 @@ class WP_Event_Aggregator_Common {
  * @since 1.5.0
  */
 function wpea_is_pro(){
-	if( !function_exists( 'is_plugin_active' ) ){
-		include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
-	}
-	if ( is_plugin_active( 'wp-event-aggregator-pro/wp-event-aggregator-pro.php' ) ) {
-		return true;
-	}
-	return false;
+	return true;
 }
 
 /**
