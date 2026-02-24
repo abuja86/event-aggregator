@@ -137,7 +137,7 @@ $venue_url = esc_url( get_post_meta( $event_id, 'venue_url', true ) );
 $venue_address_name = !empty( $venue_address ) ? $venue_address : $venue_name;
 
 if ( wpea_is_pro() && empty( $get_gmap_key ) ) {
-	$map_api_key  = WPEAPRO_GM_APIKEY;
+	$map_api_key  = defined('WPEAPRO_GM_APIKEY') ? WPEAPRO_GM_APIKEY : '';
 }elseif( !empty( $get_gmap_key ) ){
 	$map_api_key  = $get_gmap_key;
 }else{
